@@ -1,0 +1,8 @@
+{
+  "assets": [
+    "./src/images/player/down",
+    "./src/images/player/right",
+    "./src/images/player/up",
+    "./src/images/player/left"
+  ]
+}
