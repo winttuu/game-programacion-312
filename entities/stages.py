@@ -15,15 +15,15 @@ with open('./config/stages.json', 'r') as file:
     STAGE = json.load(file)
 
 class Stage:
-    def __init__(self, player: Player, stage=3):
+    def __init__(self, player: Player, stage=1):
         self.player = player
         self.current_stage = stage
         self.is_changed_stage = False
         self.not_more_stages = False
 
     def create(self):
-        print(f"{self.current_stage=}")
         self.all_sprites = Group()
+
         self.enemies = Group()
         self.coins = Group()
         self.potions = Group()
@@ -33,7 +33,6 @@ class Stage:
         self.background = None
 
         actual_stage = self.map_settings()
-        print(f"{actual_stage=}")
 
         if self.not_more_stages:
             raise NotMoreStages("No hay más niveles.")
@@ -58,16 +57,15 @@ class Stage:
         self.objective.add(o)
         self.all_sprites.add(o)
 
-
         self.player.rect.x = actual_stage["player"]["x"]
         self.player.rect.y = actual_stage["player"]["y"]
         self.player.obstacles = self.obstables
         self.player.has_objective = False
+        self.all_sprites.add(self.player)
 
         g = self._make_goal()
         self.goal.add(g)
         self.all_sprites.add(g)
-        self.all_sprites.add(self.player)
 
         self._make_background()
         self.is_changed_stage = False

@@ -1,9 +1,7 @@
 import pygame
 import json
-import sys
 import settings
 from entities import Player, Stage, Menu
-from tools import render_text
 from exceptions import PlayerHasDiedError, PlayerHasReceivedDamageError, NotMoreStages
 
 
@@ -42,7 +40,6 @@ class Game:
             self.initialize_stage()
         except NotMoreStages as e:
             self.menu.draw(is_the_end=True, score=self.player.points)
-            # if self.menu.play:
             self.stage.reset_stage()
             print(f"{self.stage.current_stage=}")
             self.create_map()
@@ -94,9 +91,8 @@ class Game:
                 except PlayerHasDiedError:
                     self.check_score()
                     self.menu.draw(is_the_end=True, is_lost=True, score=self.player.points)
-                    if self.menu.play:
-                        self.stage.reset_stage()
-                        self.create_map()
+                    self.stage.reset_stage()
+                    self.create_map()
 
     def check_coins(self):
         coin_collisions = pygame.sprite.spritecollide(self.player, self.coins, True)
@@ -156,17 +152,14 @@ class Game:
         self.screen.blit(hearts_text, (10, 50))
 
     def draw_ammunition(self):
-        x_offset = 10  # Desplazamiento inicial en el eje x
-        y_position = 700  # Posición fija en el eje y
-        spacing = 60  # Espaciado entre imagenes
-
-        # Cargar la imagen de la munición
+        x_offset = 10  
+        y_position = 700
+        spacing = 60 
+        
         bullet_image = pygame.image.load('./src/images/pergamino.png')
-        # Escala la imagen si es necesario
         bullet_image = pygame.transform.scale(bullet_image, (80, 80))
 
         for index, item in enumerate(self.player.ammunition):
-            # Dibujar la imagen en la pantalla
             self.screen.blit(bullet_image, (x_offset + index * spacing, y_position))
 
     def check_score(self):

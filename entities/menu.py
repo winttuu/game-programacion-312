@@ -7,7 +7,6 @@ class Menu:
     def __init__(self, screen):
         self.screen = screen
         self.background_image = background_image_menu
-        self.play = False
 
     def draw(self, is_the_end:bool=False, is_lost:bool=False, score:any=0): 
         self.screen.blit(self.background_image, ORIGIN)
@@ -28,13 +27,14 @@ class Menu:
             score_hover = scores_button_rect.collidepoint(mouse_pos)
             
             self.draw_button(quit_button_rect, "Cerrar", quit_hover)
-            self.draw_button(play_button_rect, "Jugar", play_hover)
 
             if not is_the_end:
                 self.draw_button(scores_button_rect, "Scores", score_hover)
+                self.draw_button(play_button_rect, "Jugar", play_hover)
             else:
                 if is_lost:
                     self.draw_message(rect=message_rect, text="GAME OVER")
+                    self.draw_button(play_button_rect, "Jugar", play_hover)
                     self.draw_button(scores_button_rect, f"Score: {score}")
                 else:
                     self.draw_message(rect=message_rect, text="Ganaste!!")
@@ -50,7 +50,6 @@ class Menu:
                     if event.button == 1:  
                         if play_button_rect.collidepoint(event.pos):
                             display = False
-                            self.play = True
                         elif quit_button_rect.collidepoint(event.pos):
                             pygame.quit()
                             sys.exit()
