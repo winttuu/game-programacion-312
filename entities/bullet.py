@@ -23,7 +23,6 @@ class Bullet(Sprite):
             self.rect.y += self.speed
 
     def draw(self, screen):
-        
         draw.rect(screen, (255, 255, 255), self.rect)
 
     def has_passed_the_limit(self):

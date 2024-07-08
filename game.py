@@ -2,9 +2,9 @@ import pygame
 import json
 import sys
 import settings
-from entities import Player, Stage
+from entities import Player, Stage, Menu
 from tools import render_text
-from exceptions import PlayerHasDiedError, PlayerHasReceivedDamageError
+from exceptions import PlayerHasDiedError, PlayerHasReceivedDamageError, NotMoreStages
 
 
 class Game:
@@ -13,6 +13,7 @@ class Game:
         self.stage = Stage(Player())
         self.game_is_running = True
         self.score = self._load_score()
+        self.menu = Menu(self.screen)
         self.create_map()
 
     def _load_score(self):
@@ -20,44 +21,40 @@ class Game:
             with open(settings.score_filepath, 'r') as file:
                 return json.load(file)
         except FileNotFoundError:
-            return {"max_score": 0, "coin": 1, "kill": 2, "nex_stage": 3}
+            return {"max_score": 0, "coin": 0, "kill": 0, "nex_stage": 0}
+
+    def initialize_stage(self):
+            print(f"{self.stage.current_stage=}")
+            self.stage.create()
+            self.player = self.stage.player
+            self.all_sprites = self.stage.all_sprites
+            self.enemies = self.stage.enemies
+            self.coins = self.stage.coins
+            self.potions = self.stage.potions
+            self.objective = self.stage.objective
+            self.goal_block = self.stage.goal
+            self.obstacles = self.stage.obstables
+            self.background = self.stage.background
+            self.all_sprites.add(self.player)
 
     def create_map(self):
-        self.stage.create()
-        self.player = self.stage.player
-        self.all_sprites = self.stage.all_sprites
-        self.enemies = self.stage.enemies
-        self.coins = self.stage.coins
-        self.potions = self.stage.potions
-        self.objective = self.stage.objective
-        self.goal_block = self.stage.goal
-        self.obstacles = self.stage.obstables
-        self.background = self.stage.background
-        self.all_sprites.add(self.player)
-
-    def menu(self, cta):
-        self.screen.blit(settings.background_image_menu, settings.ORIGIN)
-        render_text(cta, self.screen, 500, 500)
-        render_text("HI-SCORE: {}".format(self.score["max_score"]), self.screen, 10, 10)
-
-        pygame.display.flip()
-        display = True
-
-        while display:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        display = False
+        try:
+            self.initialize_stage()
+        except NotMoreStages as e:
+            self.menu.draw(is_the_end=True, score=self.player.points)
+            # if self.menu.play:
+            self.stage.reset_stage()
+            print(f"{self.stage.current_stage=}")
+            self.create_map()
 
     def run(self):
         clock = pygame.time.Clock()
+
+
         pygame.mixer.music.load('./src/sounds/game-music.mp3')
         pygame.mixer.music.play(-1)
 
-        self.menu("Press ENTER to play")
+        self.menu.draw(score=self._load_score())
 
         while self.game_is_running:
             keys = pygame.key.get_pressed()
@@ -67,7 +64,6 @@ class Game:
                     self.game_is_running = False
 
             self.all_sprites.update(keys)
-
             self.check_enemies()
             self.check_coins()
             self.check_potions()
@@ -97,8 +93,10 @@ class Game:
                     self.player.activate_invulnerable()
                 except PlayerHasDiedError:
                     self.check_score()
-                    self.game_is_running = False
-                    print("Has perdido !!!")
+                    self.menu.draw(is_the_end=True, is_lost=True, score=self.player.points)
+                    if self.menu.play:
+                        self.stage.reset_stage()
+                        self.create_map()
 
     def check_coins(self):
         coin_collisions = pygame.sprite.spritecollide(self.player, self.coins, True)

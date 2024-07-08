@@ -1,7 +1,7 @@
 import json
 import pygame
 import settings
-from pygame import image, transform, K_DOWN, K_RIGHT, K_UP, K_LEFT, K_SPACE
+from pygame import image, K_DOWN, K_RIGHT, K_UP, K_LEFT, K_SPACE
 from pygame.sprite import Sprite, collide_rect
 from .enemy import Enemy
 from .bullet import Bullet
@@ -20,12 +20,12 @@ class Player(Sprite):
             K_LEFT: []
         }
         self.speed = 10
-        self.hearts = 3
+        self.hearts = settings.INITIAL_HEARTS
         self.points = 0
         self.has_objective = False
         self.is_invulnerable = False
         self.collision_time = None
-        self.current_bullet = None  # Atributo para la bala
+        self.current_bullet = None 
         self.obstacles = []
         self.direction = K_DOWN
         self._load_images()
@@ -35,7 +35,7 @@ class Player(Sprite):
         self.rect.center = (settings.WIDTH // 2, settings.HEIGHT // 2)
         self.animation_speed = 10
         self.is_moving = False
-        self.ammunition = self._create_ammunition()
+        self.ammunition = self.create_ammunition(5)
 
     def _load_images(self):
         with open(settings.player_config_filepath, "r") as file:
@@ -48,14 +48,8 @@ class Player(Sprite):
                 img = image.load('{}/{}'.format(folder, f'sprite{i}.png'))
                 self.images[groups[index]].append(img)
 
-    def _create_ammunition(self):
-        return [
-            create_bullet,
-            create_bullet,
-            create_bullet,
-            create_bullet,
-            create_bullet,
-        ]
+    def create_ammunition(self, qty):
+        return [ create_bullet for x in range(qty) ]
 
     def update(self, keys):
         self._animate()
@@ -134,8 +128,10 @@ class Player(Sprite):
         if not self.current_bullet and len(self.ammunition) > 0:
             sound = pygame.mixer.Sound('src/sounds/shoot.mp3')
             sound.play()
+            
             x = self.rect.centerx
             y = self.rect.centery
+
             create_ammunition = self.ammunition.pop(0)
             self.current_bullet = create_ammunition(x, y, self.direction)
             print(f'Balas restantes: {len(self.ammunition)}')

@@ -1,4 +1,4 @@
-from pygame import Surface
+from pygame import Surface, image, transform
 from pygame.sprite import Sprite, collide_rect
 from .bullet import Bullet
 from settings import RED
@@ -7,8 +7,10 @@ from settings import RED
 class Enemy(Sprite):
     def __init__(self, origin, destination, speed, damage):
         super().__init__()
-        self.image = Surface((50, 50))
-        self.image.fill(RED)
+        self.width = 50
+        self.height = 50
+        self.image = image.load("./src/images/enemy.png")
+        self.image = transform.scale(self.image, (self.width, self.height))
         self.rect = self.image.get_rect()
         self.origin = origin
         self.destination = destination
@@ -25,35 +27,23 @@ class Enemy(Sprite):
             self._go_to_origin()
 
     def _go_to_destination(self):
-        current_x = self.rect.x
-        current_y = self.rect.y
+        if self.rect.x < self.destination[0]:
+            self.rect.x += self.speed
 
-        if current_x < self.destination[0]:
-            current_x += self.speed
+        if self.rect.y < self.destination[1]:
+            self.rect.y += self.speed
 
-        if current_y < self.destination[1]:
-            current_y += self.speed
-
-        self.rect.x = current_x
-        self.rect.y = current_y
-
-        if current_x >= self.destination[0] and current_y >= self.destination[1]:
+        if self.rect.x >= self.destination[0] and self.rect.y >= self.destination[1]:
             self.is_moving_to_destination = False
 
     def _go_to_origin(self):
-        current_x = self.rect.x
-        current_y = self.rect.y
+        if self.rect.x > self.origin[0]:
+            self.rect.x -= self.speed
 
-        if current_x > self.origin[0]:
-            current_x -= self.speed
+        if self.rect.y > self.origin[1]:
+            self.rect.y -= self.speed
 
-        if current_y > self.origin[1]:
-            current_y -= self.speed
-
-        self.rect.x = current_x
-        self.rect.y = current_y
-
-        if current_x <= self.origin[0] and current_y <= self.origin[1]:
+        if self.rect.x <= self.origin[0] and self.rect.y <= self.origin[1]:
             self.is_moving_to_destination = True
 
     def has_received_damage(self, bullet: Bullet) -> bool:
